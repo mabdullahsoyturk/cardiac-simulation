@@ -76,14 +76,11 @@ int main(int argc, char** argv) {
 
   dump_prerun_info(n, T, dt, bx, by, kernel);
 
-  // Start the timer
-  double t0 = getTime();
+  double t0 = getTime(); // Start the timer
 
   // Simulated time is different from the integer timestep number
-  // Simulated time
-  double t = 0.0;
-  // Integer timestep number
-  int niter = 0;
+  double t = 0.0; // Simulated time
+  int niter = 0;  // Integer timestep number
 
   while (t < T) {
     t += dt;
