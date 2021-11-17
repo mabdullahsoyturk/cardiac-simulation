@@ -1,10 +1,4 @@
 /*
- * Solves the Panfilov model using an explicit numerical scheme.
- * Based on code orginally provided by Xing Cai, Simula Research Laboratory
- * and reimplementation by Scott B. Baden, UCSD
- *
- * Modified and  restructured by Didem Unat, Koc University
- *
  * Refer to "Detailed Numerical Analyses of the Aliev-Panfilov Model on GPGPU"
  * https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu
  * by Xing Cai, Didem Unat and Scott Baden
