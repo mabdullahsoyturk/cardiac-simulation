@@ -16,7 +16,8 @@ double stats(double** E, int m, int n, double* _mx);
 double getTime();
 double** alloc2D(int m, int n);
 void init_solution_arrays(double **E, double **R, double **E_prev, int m, int n);
-void dump_info(int n, double T, double dt, int bx, int by, int kernel);
+void dump_prerun_info(int n, double T, double dt, int bx, int by, int kernel);
+void dump_postrun_info(int niter, double time_elapsed, int m, int n, double **E_prev);
 /* Function to plot the 2D array
  * 'gnuplot' is instantiated via a pipe and
  * the values to be plotted are passed through, along

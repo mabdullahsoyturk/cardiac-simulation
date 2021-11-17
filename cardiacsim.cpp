@@ -1,5 +1,3 @@
-// https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu
-
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -76,7 +74,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  dump_info(n, T, dt, bx, by, kernel);
+  dump_prerun_info(n, T, dt, bx, by, kernel);
 
   // Start the timer
   double t0 = getTime();
@@ -108,17 +106,7 @@ int main(int argc, char** argv) {
 
   double time_elapsed = getTime() - t0;
 
-  double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
-  double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
-
-  cout << "Number of Iterations        : " << niter << endl;
-  cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
-  cout << "Sustained Gflops Rate       : " << Gflops << endl;
-  cout << "Sustained Bandwidth (GB/sec): " << BW << endl << endl;
-
-  double mx;
-  double l2norm = stats(E_prev, m, n, &mx);
-  cout << "Max: " << mx << " L2norm: " << l2norm << endl;
+  dump_postrun_info(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;

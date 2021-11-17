@@ -12,7 +12,7 @@ void init_solution_arrays(double **E, double **R, double **E_prev, int m, int n)
     for (i = 1; i <= n; i++) R[j][i] = 1.0;
 }
 
-void dump_info(int n, double T, double dt, int bx, int by, int kernel) {
+void dump_prerun_info(int n, double T, double dt, int bx, int by, int kernel) {
   cout << "Grid Size       : " << n << endl;
   cout << "Duration of Sim : " << T << endl;
   cout << "Time step dt    : " << dt << endl;
@@ -20,6 +20,20 @@ void dump_info(int n, double T, double dt, int bx, int by, int kernel) {
   cout << "Using CUDA Kernel Version: " << kernel << endl;
 
   cout << endl;
+}
+
+void dump_postrun_info(int niter, double time_elapsed, int m, int n, double **E_prev) {
+  double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
+  double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
+
+  cout << "Number of Iterations        : " << niter << endl;
+  cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
+  cout << "Sustained Gflops Rate       : " << Gflops << endl;
+  cout << "Sustained Bandwidth (GB/sec): " << BW << endl << endl;
+
+  double mx;
+  double l2norm = stats(E_prev, m, n, &mx);
+  cout << "Max: " << mx << " L2norm: " << l2norm << endl;
 }
 
 void cmdLine(int argc, char* argv[], double& T, int& n, int& bx, int& by, int& plot_freq, int& kernel) {
