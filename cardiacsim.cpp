@@ -11,10 +11,8 @@
 void simulate(double** E, double** E_prev, double** R, const double alpha, const int n, const int m, const double kk,
               const double dt, const double a, const double epsilon, const double M1, const double M2, const double b) {
   int i, j;
-  /*
-   * Copy data from boundary of the computational box to the padding region, set up for differencing
-   * on the boundary of the computational box using mirror boundaries
-   */
+  // Copy data from boundary of the computational box to the padding region, set up for differencing on the boundary of
+  // the computational box using mirror boundaries
 
   for (j = 1; j <= m; j++) E_prev[j][0] = E_prev[j][2];
   for (j = 1; j <= m; j++) E_prev[j][n + 1] = E_prev[j][n - 1];
@@ -30,30 +28,24 @@ void simulate(double** E, double** E_prev, double** R, const double alpha, const
     }
   }
 
-  /*
-   * Solve the ODE, advancing excitation and recovery to the next time step
-   */
+  // Solve the ODE, advancing excitation and recovery to the next time step
   for (j = 1; j <= m; j++) {
-    for (i = 1; i <= n; i++)
+    for (i = 1; i <= n; i++) {
       E[j][i] = E[j][i] - dt * (kk * E[j][i] * (E[j][i] - a) * (E[j][i] - 1) + E[j][i] * R[j][i]);
+    }
   }
 
   for (j = 1; j <= m; j++) {
-    for (i = 1; i <= n; i++)
-      R[j][i] =
-          R[j][i] + dt * (epsilon + M1 * R[j][i] / (E[j][i] + M2)) * (-R[j][i] - kk * E[j][i] * (E[j][i] - b - 1));
+    for (i = 1; i <= n; i++) {
+      R[j][i] = R[j][i] + dt * (epsilon + M1 * R[j][i] / (E[j][i] + M2)) * (-R[j][i] - kk * E[j][i] * (E[j][i] - b - 1));
+    }
   }
 }
 
-// Main program
 int main(int argc, char** argv) {
-  /*
-   *  Solution arrays
-   *   E is the "Excitation" variable, a voltage
-   *   R is the "Recovery" variable
-   *   E_prev is the Excitation variable for the previous timestep,
-   *      and is used in time integration
-   */
+  // E is the "Excitation" variable, a voltage
+  // R is the "Recovery" variable
+  // E_prev is the Excitation variable for the previous timestep, and is used in time integration
   double **E, **R, **E_prev;
 
   // Various constants - these definitions shouldn't change
@@ -67,24 +59,13 @@ int main(int argc, char** argv) {
 
   cmdLine(argc, argv, T, n, bx, by, plot_freq, kernel);
   m = n;
-  // Allocate contiguous memory for solution arrays
-  // The computational box is defined on [1:m+1,1:n+1]
-  // We pad the arrays in order to facilitate differencing on the
-  // boundaries of the computation box
+  // Allocate contiguous memory for solution arrays. The computational box is defined on [1:m+1,1:n+1]
+  // We pad the arrays in order to facilitate differencing on the boundaries of the computation box
   E = alloc2D(m + 2, n + 2);
   E_prev = alloc2D(m + 2, n + 2);
   R = alloc2D(m + 2, n + 2);
 
-  int i, j;
-  // Initialization
-  for (j = 1; j <= m; j++)
-    for (i = 1; i <= n; i++) E_prev[j][i] = R[j][i] = 0;
-
-  for (j = 1; j <= m; j++)
-    for (i = n / 2 + 1; i <= n; i++) E_prev[j][i] = 1.0;
-
-  for (j = m / 2 + 1; j <= m; j++)
-    for (i = 1; i <= n; i++) R[j][i] = 1.0;
+  init_solution_arrays(E, R, E_prev, m, n);
 
   double dx = 1.0 / n;
 
@@ -95,13 +76,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  cout << "Grid Size       : " << n << endl;
-  cout << "Duration of Sim : " << T << endl;
-  cout << "Time step dt    : " << dt << endl;
-  cout << "Block Size: " << bx << " x " << by << endl;
-  cout << "Using CUDA Kernel Version: " << kernel << endl;
-
-  cout << endl;
+  dump_info(n, T, dt, bx, by, kernel);
 
   // Start the timer
   double t0 = getTime();
@@ -129,7 +104,7 @@ int main(int argc, char** argv) {
         splot(E, t, niter, m + 2, n + 2);
       }
     }
-  }  // end of while loop
+  }
 
   double time_elapsed = getTime() - t0;
 

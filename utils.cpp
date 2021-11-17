@@ -1,5 +1,27 @@
 #include "utils.h"
 
+void init_solution_arrays(double **E, double **R, double **E_prev, int m, int n) {
+  int i, j;
+  for (j = 1; j <= m; j++)
+    for (i = 1; i <= n; i++) E_prev[j][i] = R[j][i] = 0;
+
+  for (j = 1; j <= m; j++)
+    for (i = n / 2 + 1; i <= n; i++) E_prev[j][i] = 1.0;
+
+  for (j = m / 2 + 1; j <= m; j++)
+    for (i = 1; i <= n; i++) R[j][i] = 1.0;
+}
+
+void dump_info(int n, double T, double dt, int bx, int by, int kernel) {
+  cout << "Grid Size       : " << n << endl;
+  cout << "Duration of Sim : " << T << endl;
+  cout << "Time step dt    : " << dt << endl;
+  cout << "Block Size: " << bx << " x " << by << endl;
+  cout << "Using CUDA Kernel Version: " << kernel << endl;
+
+  cout << endl;
+}
+
 void cmdLine(int argc, char* argv[], double& T, int& n, int& bx, int& by, int& plot_freq, int& kernel) {
   // Default value of the domain sizes
   static struct option long_options[] = {
