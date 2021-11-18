@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void init_solution_arrays(double **E, double **R, double **E_prev, int m, int n) {
+void initSolutionArrays(double **E, double **R, double **E_prev, int m, int n) {
   int i, j;
   for (j = 1; j <= m; j++)
     for (i = 1; i <= n; i++) E_prev[j][i] = R[j][i] = 0;
@@ -12,7 +12,7 @@ void init_solution_arrays(double **E, double **R, double **E_prev, int m, int n)
     for (i = 1; i <= n; i++) R[j][i] = 1.0;
 }
 
-void dump_prerun_info(int n, double T, double dt, int bx, int by, int kernel) {
+void dumpPrerunInfo(int n, double T, double dt, int bx, int by, int kernel) {
   cout << "Grid Size       : " << n << endl;
   cout << "Duration of Sim : " << T << endl;
   cout << "Time step dt    : " << dt << endl;
@@ -22,7 +22,7 @@ void dump_prerun_info(int n, double T, double dt, int bx, int by, int kernel) {
   cout << endl;
 }
 
-void dump_postrun_info(int niter, double time_elapsed, int m, int n, double **E_prev) {
+void dumpPostrunInfo(int niter, double time_elapsed, int m, int n, double **E_prev) {
   double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
   double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
 
@@ -126,6 +126,30 @@ double** alloc2D(int m, int n) {
   return (E);
 }
 
+void hostToDeviceCopy(double* dst, double** src, int m, int n) {
+  for(int i = 0; i < m; i++) {
+    CUDA_CALL(cudaMemcpy(dst + i * n, src[i], sizeof(double) * n, cudaMemcpyHostToDevice));
+  }
+
+  /*for(int i = 0; i < m+2; i++) {
+    printf("E[2][%d]:%f\n", i, src[2][i]);
+  }
+
+  double* test = (double*)malloc(sizeof(double) * (m+2));
+  CUDA_CALL(cudaMemcpy(test, dst + (n + 2) * 2, sizeof(double) * n, cudaMemcpyDeviceToHost));
+  for(int i = 0; i < m+2; i++) {
+    printf("test[%d]:%f\n", i, test[i]);
+  }*/
+}
+
+void deviceToHostCopy(double** dst, double* src, int m, int n) {
+  for(int i = 0; i < m; i++) {
+    CUDA_CALL(cudaMemcpy(dst[i], src + i * n, sizeof(double) * n, cudaMemcpyDeviceToHost));
+  }
+
+  //dumpit(dst, m);
+}
+
 FILE* gnu = NULL;
 
 void splot(double** U, double T, int niter, int m, int n) {
@@ -159,4 +183,12 @@ void splot(double** U, double T, int niter, int m, int n) {
   fprintf(gnu, "e\n");
   fflush(gnu);
   return;
+}
+
+void dumpit(double** E, int m) {
+  for(int i = 0; i < m + 2; i++) {
+      for(int j = 0; j < m + 2; j++) {
+        printf("E[%d][%d]: %f\n", i, j, E[i][j]);
+      }
+  }
 }

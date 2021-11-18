@@ -12,39 +12,19 @@ void simulate(double** E, double** E_prev, double** R, const double alpha, const
   // Copy data from boundary of the computational box to the padding region, set up for differencing on the boundary of
   // the computational box using mirror boundaries
 
-  for (j = 1; j <= m; j++) {
-    E_prev[j][0] = E_prev[j][2];
-    //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", j, 0, j, 2, E_prev[j][2]);
-  }
-  
-  for (j = 1; j <= m; j++) {
-    E_prev[j][n + 1] = E_prev[j][n - 1];
-    //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", j, n+1, j, n-1, E_prev[j][n-1]);
-  }
+  for (j = 1; j <= m; j++) E_prev[j][0] = E_prev[j][2];
+  for (j = 1; j <= m; j++) E_prev[j][n + 1] = E_prev[j][n - 1];
 
-  for (i = 1; i <= n; i++) {
-    E_prev[0][i] = E_prev[2][i];
-    //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", 0, i, 2, i, E_prev[2][i]);
-  }
-  for (i = 1; i <= n; i++) {
-    E_prev[m + 1][i] = E_prev[m - 1][i];
-    //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", m+1, i, m-1, i, E_prev[m-1][i]);
-  }
-
-  //dumpit(E_prev, m);
+  for (i = 1; i <= n; i++) E_prev[0][i] = E_prev[2][i];
+  for (i = 1; i <= n; i++) E_prev[m + 1][i] = E_prev[m - 1][i];
 
   // Solve for the excitation, the PDE
   for (j = 1; j <= m; j++) {
     for (i = 1; i <= n; i++) {
       E[j][i] = E_prev[j][i] +
                 alpha * (E_prev[j][i + 1] + E_prev[j][i - 1] - 4 * E_prev[j][i] + E_prev[j + 1][i] + E_prev[j - 1][i]);
-
-      //printf("E[%d][%d] = E_prev[%d][%d] + (E_prev[%d][%d] + E_prev[%d][%d] - 4 * E_prev[%d][%d] + E_prev[%d][%d] + E_prev[%d][%d])\n", j, i, j, i, j, i+1, j, i-1, j, i, j+1, i, j-1, i);
-      //printf("E[%d][%d]=%f\n", j,i,E[j][i]);
     }
   }
-
-  //dumpit(E, m);
 
   // Solve the ODE, advancing excitation and recovery to the next time step
   for (j = 1; j <= m; j++) {
@@ -107,8 +87,6 @@ int main(int argc, char** argv) {
     niter++;
 
     simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-    dumpit(E, m);
-    exit(0);
 
     // swap current E with previous E
     double** tmp = E;

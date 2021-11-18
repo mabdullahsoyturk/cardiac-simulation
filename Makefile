@@ -234,7 +234,7 @@ LIBRARIES :=
 ################################################################################
 
 # Gencode arguments
-SMS ?= 60 61 70 75 80 86
+SMS ?= 86
 
 ifeq ($(SMS),)
 $(info >>> WARNING - no SM architectures have been specified - waiving sample <<<)
@@ -261,7 +261,7 @@ endif
 # Target rules
 all: build
 
-build: cardiacsim
+build: cardiacsim version1 version2 version3 version4
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -270,10 +270,22 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-utils.o:utils.cpp
+utils.o:utils.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 cardiacsim.o:cardiacsim.cpp
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
+version1.o:version1.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
+version2.o:version2.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
+version3.o:version3.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
+version4.o:version4.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 cardiacsim_kernels.o:cardiacsim_kernels.cu
@@ -284,10 +296,22 @@ cardiacsim: cardiacsim.o cardiacsim_kernels.o utils.o
 	$(EXEC) mkdir -p ./bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ ./bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
+version1: version1.o cardiacsim_kernels.o utils.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+
+version2: version2.o cardiacsim_kernels.o utils.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+
+version3: version3.o cardiacsim_kernels.o utils.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+
+version4: version4.o cardiacsim_kernels.o utils.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+
 run: build
 	$(EXEC) ./cardiacsim
 
 clean:
-	rm -f cardiacsim cardiacsim.o cardiacsim_kernels.o
+	rm -f cardiacsim version1 version2 version3 version4 cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o utils.o
 	rm -rf ./bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/cardiacsim
 
