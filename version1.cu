@@ -71,14 +71,16 @@ int main(int argc, char** argv) {
     hostToDeviceCopy(d_R, R, m + 2, n + 2);
     hostToDeviceCopy(d_E_prev, E_prev, m + 2, n + 2);
     kernel1_pde<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    deviceToHostCopy(E, d_E, m + 2, n + 2);
+    deviceToHostCopy(R, d_R, m + 2, n + 2);
+    deviceToHostCopy(E_prev, d_E_prev, m + 2, n + 2);
+    dumpit(E, m);
+    exit(0);
     cudaDeviceSynchronize();
     kernel1_ode<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
     deviceToHostCopy(E, d_E, m + 2, n + 2);
     deviceToHostCopy(R, d_R, m + 2, n + 2);
     deviceToHostCopy(E_prev, d_E_prev, m + 2, n + 2);
-
-    dumpit(E, m);
-    exit(0);
 
     // swap current E with previous E
     double** tmp = E;

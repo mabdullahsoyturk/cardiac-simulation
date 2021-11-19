@@ -9,17 +9,21 @@ __global__ void kernel1_pde(double* E, double* E_prev, double* R, const double a
 
   if(row >= 1 && row <= m && threadIdx.x == 0) {
 	  E_prev[row * (n + 2)] = E_prev[row * (n + 2) + 2];
-  	E_prev[row * (n + 2) + n + 1] = E_prev[row * (n + 2) + n - 1];
-
     //printf("E_prev[%d * (%d)] = E_prev[%d * %d + 2] (%f)\n", row, n+2, row, (n + 2), E_prev[row * (n + 2) + 2]);
+  }
+
+  if(row >= 1 && row <= m && threadIdx.x == 0) {
+  	E_prev[row * (n + 2) + n + 1] = E_prev[row * (n + 2) + n - 1];
     //printf("E_prev[%d * (%d) + %d] = E_prev[%d * %d + %d] (%f)\n", row, n+2, n+1, row, (n + 2), n-1, E_prev[row * (n + 2) + n - 1]);
   }
 
   if(col >= 1 && col <= n && threadIdx.y == 0) {
-	  E_prev[col] = E_prev[col * (m + 2) + 2];
-    E_prev[(m + 1) * (n + 2) + col] = E_prev[(m - 1) * (n + 2) + col];
+	  E_prev[col] = E_prev[2 * (m + 2) + col];
+    //printf("E_prev[%d] = E_prev[%d * (%d) + %d] (%f)\n", col, 2, m+2, col, E_prev[2 * (m + 2) + col]);
+  }
 
-    //printf("E_prev[%d] = E_prev[%d * (%d) + %d] (%f)\n", col, m+2, 2, col, E_prev[(m - 1) * (n + 2) + col]);
+  if(col >= 1 && col <= n && threadIdx.y == 0) {
+    E_prev[(m + 1) * (n + 2) + col] = E_prev[(m - 1) * (n + 2) + col];
     //printf("E_prev[%d * (%d) + %d] = E_prev[%d * %d + %d] (%f)\n", m+1, n+2, col, m-1, (n + 2), col, E_prev[(m - 1) * (n + 2) + col]);
   }
 
@@ -30,6 +34,8 @@ __global__ void kernel1_pde(double* E, double* E_prev, double* R, const double a
       }
     }
   }*/
+
+  __syncthreads();
 
   if(col >= 1 && col <= n && row >= 1 && row <= m) {
 	  E[row * (n + 2) + col] = E_prev[row * (n + 2) + col] +
