@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   double t0 = getTime(); // Start the timer
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
-    printf("Iteration:%d\n", niter);
+    //printf("Iteration:%d\n", niter);
 
     simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
 
@@ -114,24 +114,24 @@ int main(int argc, char** argv) {
     E = E_prev;
     E_prev = tmp;
 
-    dumpit(E, m);
+    //dumpit(E, m);
 
-    /*if (plot_freq) {
+    if (plot_freq) {
       int k = (int)(t / plot_freq);
       if ((t - k * plot_freq) < dt) {
         splot(E, t, niter, m + 2, n + 2);
       }
-    }*/
+    }
   }
 
   double time_elapsed = getTime() - t0;
 
-  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
-  /*if (plot_freq) {
+  if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
     getchar();
-  }*/
+  }
 
   free(E);
   free(E_prev);

@@ -314,4 +314,3 @@ run: build
 clean:
 	rm -f cardiacsim version1 version2 version3 version4 cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o utils.o
 	rm -rf ./bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/cardiacsim
-

@@ -18,7 +18,6 @@ void dumpPrerunInfo(int n, double T, double dt, int bx, int by, int kernel) {
   cout << "Time step dt    : " << dt << endl;
   cout << "Block Size: " << bx << " x " << by << endl;
   cout << "Using CUDA Kernel Version: " << kernel << endl;
-
   cout << endl;
 }
 
@@ -49,36 +48,23 @@ void cmdLine(int argc, char* argv[], double& T, int& n, int& bx, int& by, int& p
     int c;
     while ((c = getopt_long(argc, argv, "n:x:y:t:p:v:", long_options, NULL)) != -1) {
       switch (c) {
-        // Size of the computational box
-        case 'n':
+        case 'n': // Size of the computational box
           n = atoi(optarg);
           break;
-
-        // X block geometry
-        case 'x':
+        case 'x': // X block geometry
           bx = atoi(optarg);
-
-        // Y block geometry
-        case 'y':
+        case 'y': // Y block geometry
           by = atoi(optarg);
-
-        // Length of simulation, in simulated time units
-        case 't':
+        case 't': // Length of simulation, in simulated time units
           T = atof(optarg);
           break;
-
-        // Plot the excitation variable
-        case 'p':
+        case 'p': // Plot the excitation variable
           plot_freq = atoi(optarg);
-          break;
-
-        // Kernel version
+          break; // Kernel version
         case 'v':
           kernel = atoi(optarg);
           break;
-
-        // Error
-        default:
+        default: // Error
           printf(
               "Usage:  [-n <domain size>] [-t <final time >]\n\t [-p <plot frequency>]\n\t[-x <x block geometry> [-y "
               "<y block geometry][-v <Kernel Version>]\n");
@@ -130,24 +116,12 @@ void hostToDeviceCopy(double* dst, double** src, int m, int n) {
   for(int i = 0; i < m; i++) {
     CUDA_CALL(cudaMemcpy(dst + i * n, src[i], sizeof(double) * n, cudaMemcpyHostToDevice));
   }
-
-  /*for(int i = 0; i < m+2; i++) {
-    printf("E[2][%d]:%f\n", i, src[2][i]);
-  }
-
-  double* test = (double*)malloc(sizeof(double) * (m+2));
-  CUDA_CALL(cudaMemcpy(test, dst + (n + 2) * 2, sizeof(double) * n, cudaMemcpyDeviceToHost));
-  for(int i = 0; i < m+2; i++) {
-    printf("test[%d]:%f\n", i, test[i]);
-  }*/
 }
 
 void deviceToHostCopy(double** dst, double* src, int m, int n) {
   for(int i = 0; i < m; i++) {
     CUDA_CALL(cudaMemcpy(dst[i], src + i * n, sizeof(double) * n, cudaMemcpyDeviceToHost));
   }
-
-  //dumpit(dst, m);
 }
 
 FILE* gnu = NULL;
