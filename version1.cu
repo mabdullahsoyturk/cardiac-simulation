@@ -55,9 +55,11 @@ int main(int argc, char** argv) {
 
   // Kernel config
   // Threads per CTA dimension
-  int THREADS = n + 1;
+  int THREADS = 32;
 
   int BLOCKS = (n + THREADS - 1) / THREADS;
+  std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
+  std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
 
   // Use dim3 structs for block  and grid dimensions
   dim3 threads(THREADS, THREADS);
@@ -66,26 +68,24 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
+    //printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, E, m + 2, n + 2);
     hostToDeviceCopy(d_R, R, m + 2, n + 2);
     hostToDeviceCopy(d_E_prev, E_prev, m + 2, n + 2);
     kernel1_pde<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-    deviceToHostCopy(E, d_E, m + 2, n + 2);
-    deviceToHostCopy(R, d_R, m + 2, n + 2);
-    deviceToHostCopy(E_prev, d_E_prev, m + 2, n + 2);
-    dumpit(E, m);
-    exit(0);
     cudaDeviceSynchronize();
     kernel1_ode<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
     deviceToHostCopy(E, d_E, m + 2, n + 2);
     deviceToHostCopy(R, d_R, m + 2, n + 2);
     deviceToHostCopy(E_prev, d_E_prev, m + 2, n + 2);
-
+    
     // swap current E with previous E
     double** tmp = E;
     E = E_prev;
     E_prev = tmp;
+
+    //dumpit(E, m);
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
@@ -107,6 +107,9 @@ int main(int argc, char** argv) {
   free(E);
   free(E_prev);
   free(R);
+  cudaFree(d_E);
+  cudaFree(d_R);
+  cudaFree(d_E_prev);
 
   return 0;
 }

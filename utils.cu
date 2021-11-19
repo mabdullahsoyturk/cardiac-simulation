@@ -188,7 +188,7 @@ void splot(double** U, double T, int niter, int m, int n) {
 void dumpit(double** E, int m) {
   for(int i = 0; i < m + 2; i++) {
       for(int j = 0; j < m + 2; j++) {
-        printf("E[%d][%d]: %f\n", i, j, E[i][j]);
+        printf("E[%d][%d]:%f\n", i, j, E[i][j]);
       }
   }
 }

@@ -5,46 +5,14 @@
 #include <iomanip>
 
 #include "utils.h"
-
-void simulate(double** E, double** E_prev, double** R, const double alpha, const int n, const int m, const double kk,
-              const double dt, const double a, const double epsilon, const double M1, const double M2, const double b) {
-  int i, j;
-  // Copy data from boundary of the computational box to the padding region, set up for differencing on the boundary of
-  // the computational box using mirror boundaries
-
-  for (j = 1; j <= m; j++) E_prev[j][0] = E_prev[j][2];
-  for (j = 1; j <= m; j++) E_prev[j][n + 1] = E_prev[j][n - 1];
-
-  for (i = 1; i <= n; i++) E_prev[0][i] = E_prev[2][i];
-  for (i = 1; i <= n; i++) E_prev[m + 1][i] = E_prev[m - 1][i];
-
-  // Solve for the excitation, the PDE
-  for (j = 1; j <= m; j++) {
-    for (i = 1; i <= n; i++) {
-      E[j][i] = E_prev[j][i] +
-                alpha * (E_prev[j][i + 1] + E_prev[j][i - 1] - 4 * E_prev[j][i] + E_prev[j + 1][i] + E_prev[j - 1][i]);
-    }
-  }
-
-  // Solve the ODE, advancing excitation and recovery to the next time step
-  for (j = 1; j <= m; j++) {
-    for (i = 1; i <= n; i++) {
-      E[j][i] = E[j][i] - dt * (kk * E[j][i] * (E[j][i] - a) * (E[j][i] - 1) + E[j][i] * R[j][i]);
-    }
-  }
-
-  for (j = 1; j <= m; j++) {
-    for (i = 1; i <= n; i++) {
-      R[j][i] = R[j][i] + dt * (epsilon + M1 * R[j][i] / (E[j][i] + M2)) * (-R[j][i] - kk * E[j][i] * (E[j][i] - b - 1));
-    }
-  }
-}
+#include "cardiacsim_kernels.h"
 
 int main(int argc, char** argv) {
   // E is the "Excitation" variable, a voltage
   // R is the "Recovery" variable
   // E_prev is the Excitation variable for the previous timestep, and is used in time integration
   double **E, **R, **E_prev;
+  double *d_E, *d_R, *d_E_prev;
 
   // Various constants - these definitions shouldn't change
   const double a = 0.1, b = 0.1, kk = 8.0, M1 = 0.07, M2 = 0.3, epsilon = 0.01, d = 5e-5;
@@ -62,6 +30,9 @@ int main(int argc, char** argv) {
   E = alloc2D(m + 2, n + 2);
   E_prev = alloc2D(m + 2, n + 2);
   R = alloc2D(m + 2, n + 2);
+  CUDA_CALL(cudaMalloc(&d_E, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMalloc(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
 
   initSolutionArrays(E, R, E_prev, m, n);
 
@@ -74,7 +45,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   double t0 = getTime(); // Start the timer
 
@@ -82,37 +53,61 @@ int main(int argc, char** argv) {
   double t = 0.0; // Simulated time
   int niter = 0;  // Integer timestep number
 
+  // Kernel config
+  // Threads per CTA dimension
+  int THREADS = 32;
+
+  int BLOCKS = (n + THREADS - 1) / THREADS;
+  std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
+  std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
+
+  // Use dim3 structs for block  and grid dimensions
+  dim3 threads(THREADS, THREADS);
+  dim3 blocks(BLOCKS, BLOCKS);
+
   while (t < T) {
     t += dt;
     niter++;
+    printf("Iteration:%d\n", niter);
 
-    simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-
+    hostToDeviceCopy(d_E, E, m + 2, n + 2);
+    hostToDeviceCopy(d_R, R, m + 2, n + 2);
+    hostToDeviceCopy(d_E_prev, E_prev, m + 2, n + 2);
+    kernel3<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    deviceToHostCopy(E, d_E, m + 2, n + 2);
+    deviceToHostCopy(R, d_R, m + 2, n + 2);
+    deviceToHostCopy(E_prev, d_E_prev, m + 2, n + 2);
+    
     // swap current E with previous E
     double** tmp = E;
     E = E_prev;
     E_prev = tmp;
 
-    if (plot_freq) {
+    dumpit(E, m);
+
+    /*if (plot_freq) {
       int k = (int)(t / plot_freq);
       if ((t - k * plot_freq) < dt) {
         splot(E, t, niter, m + 2, n + 2);
       }
-    }
+    }*/
   }
 
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
-  if (plot_freq) {
+  /*if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
     getchar();
-  }
+  }*/
 
   free(E);
   free(E_prev);
   free(R);
+  cudaFree(d_E);
+  cudaFree(d_R);
+  cudaFree(d_E_prev);
 
   return 0;
 }
