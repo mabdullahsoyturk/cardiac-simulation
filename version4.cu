@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   double t0 = getTime(); // Start the timer
 
@@ -78,7 +78,9 @@ int main(int argc, char** argv) {
     //printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2, stream);
-    kernel3<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    kernel4<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    cudaDeviceSynchronize();
+    exit(0);
     deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2, stream);
     
     // swap current E with previous E
@@ -98,7 +100,7 @@ int main(int argc, char** argv) {
 
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
