@@ -97,13 +97,12 @@ __global__ void kernel3(double* E, double* E_prev, double* R, const double alpha
 				        E_prev[row * (n + 2) + col] + E_prev[(row + 1) * (n + 2) + col] + E_prev[(row - 1) * (n + 2) + col]);
     
     double temp = E[row * (n + 2) + col];
+    double temp2 = R[row * (n + 2) + col];
 
-    E[row * (n + 2) + col] = temp - dt * (kk * temp * (temp - a) * 
-            (temp - 1) + temp * R[row * (n + 2) + col]);
+    E[row * (n + 2) + col] = temp - dt * (kk * temp * (temp - a) * (temp - 1) + temp * temp2);
 
     temp = E[row * (n + 2) + col];
 
-    double temp2 = R[row * (n + 2) + col];
     R[row * (n + 2) + col] = temp2 + dt * (epsilon + M1 * temp2 / (temp + M2)) * 
           (-temp2 - kk * temp * (temp - b - 1));
 

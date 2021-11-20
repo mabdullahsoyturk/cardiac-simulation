@@ -23,8 +23,8 @@ void cmdLine(int argc, char* argv[], double& T, int& n, int& px, int& py, int& p
 double stats(double** E, int m, int n, double* _mx);
 double getTime();
 double** alloc2D(int m, int n);
-void hostToDeviceCopy(double* dst, double** src, int m, int n);
-void deviceToHostCopy(double** dst, double* src, int m, int n);
+void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double** E, double** R, double** E_prev, int m, int n, cudaStream_t stream[3]);
+void deviceToHostCopy(double** E, double** R, double** E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n, cudaStream_t stream[3]);
 void initSolutionArrays(double **E, double **R, double **E_prev, int m, int n);
 void dumpPrerunInfo(int n, double T, double dt, int bx, int by, int kernel);
 void dumpPostrunInfo(int niter, double time_elapsed, int m, int n, double **E_prev);

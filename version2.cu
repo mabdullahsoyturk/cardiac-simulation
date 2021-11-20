@@ -30,9 +30,9 @@ int main(int argc, char** argv) {
   E = alloc2D(m + 2, n + 2);
   E_prev = alloc2D(m + 2, n + 2);
   R = alloc2D(m + 2, n + 2);
-  CUDA_CALL(cudaMalloc(&d_E, sizeof(double) * (n + 2) * (m + 2)));
-  CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
-  CUDA_CALL(cudaMalloc(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&d_E, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&d_R, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
 
   initSolutionArrays(E, R, E_prev, m, n);
 
@@ -65,18 +65,21 @@ int main(int argc, char** argv) {
   dim3 threads(THREADS, THREADS);
   dim3 blocks(BLOCKS, BLOCKS);
 
+  const int nStreams = 3;
+  cudaStream_t stream[nStreams];
+
+  for (int i = 0; i < nStreams; ++i) {
+    CUDA_CALL(cudaStreamCreate(&stream[i]));
+  }
+
   while (t < T) {
     t += dt;
     niter++;
     //printf("Iteration:%d\n", niter);
 
-    hostToDeviceCopy(d_E, E, m + 2, n + 2);
-    hostToDeviceCopy(d_R, R, m + 2, n + 2);
-    hostToDeviceCopy(d_E_prev, E_prev, m + 2, n + 2);
+    hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2, stream);
     kernel2<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-    deviceToHostCopy(E, d_E, m + 2, n + 2);
-    deviceToHostCopy(R, d_R, m + 2, n + 2);
-    deviceToHostCopy(E_prev, d_E_prev, m + 2, n + 2);
+    deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2, stream);
     
     // swap current E with previous E
     double** tmp = E;
@@ -100,6 +103,10 @@ int main(int argc, char** argv) {
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
     getchar();
+  }
+  
+  for (int i = 0; i < nStreams; ++i) {
+    CUDA_CALL(cudaStreamDestroy(stream[i]));
   }
 
   free(E);
