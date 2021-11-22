@@ -112,9 +112,9 @@ int main(int argc, char** argv) {
   free(E);
   free(E_prev);
   free(R);
-  cudaFree(d_E);
-  cudaFree(d_R);
-  cudaFree(d_E_prev);
+  cudaFreeHost(d_E);
+  cudaFreeHost(d_R);
+  cudaFreeHost(d_E_prev);
 
   return 0;
 }
