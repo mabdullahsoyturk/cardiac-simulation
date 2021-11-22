@@ -29,15 +29,7 @@ int main(int argc, char** argv) {
   CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
 
-  int i,j;
-  for (j = 1; j <= m; j++)
-    for (i = 1; i <= n; i++) E_prev[j * (m + 2) + i] = R[j * m + i] = 0;
-
-  for (j = 1; j <= m; j++)
-    for (i = n / 2 + 1; i <= n; i++) E_prev[j * (m + 2) + i] = 1.0;
-
-  for (j = m / 2 + 1; j <= m; j++)
-    for (i = 1; i <= n; i++) R[j * (m + 2) + i] = 1.0;
+  initSolutionArrays(E, R, E_prev, m, n);
 
   double dx = 1.0 / n;
 
@@ -48,7 +40,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   // Kernel config
   int THREADS = 32;
@@ -76,7 +68,7 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
-    //printf("Iteration:%d\n", niter);
+    printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2, stream);
     kernel3<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
@@ -87,7 +79,7 @@ int main(int argc, char** argv) {
     E = E_prev;
     E_prev = tmp;
 
-    //dumpit(E, m);
+    dumpit(E, m);
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
@@ -99,7 +91,7 @@ int main(int argc, char** argv) {
 
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;

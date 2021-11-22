@@ -115,6 +115,8 @@ __global__ void kernel4(double* E, double* E_prev, double* R, const double alpha
   int row = blockIdx.y * blockDim.y + threadIdx.y;
   int col = blockIdx.x * blockDim.x + threadIdx.x;
 
+  __shared__ double cache[34][34];
+
   if(row >= 1 && row <= m && threadIdx.x == 0) {
 	  E_prev[row * (n + 2)] = E_prev[row * (n + 2) + 2];
     E_prev[row * (n + 2) + n + 1] = E_prev[row * (n + 2) + n - 1];
@@ -126,10 +128,13 @@ __global__ void kernel4(double* E, double* E_prev, double* R, const double alpha
   }
 
   __syncthreads();
+
   /*if(blockIdx.x == 0 && blockIdx.y == 0 && threadIdx.x == 0 && threadIdx.y == 0) {
-    for(int i = 0; i < (n+2) * (m+2); i++) {
-      printf("E_prev[%d] = %f\n", i, E_prev[i]);
-      printf("shared[%d] = %f\n", i, shared[i]);
+    for(int i = 0; i < 34; i++) {
+      for(int j = 0; j < 34; j++) {
+        printf("E_prev[%d][%d] = %f\n", i, j, E_prev[i * (n+2) + j]);
+        printf("shared[%d][%d] = %f\n", i, j, cache[i][j]);
+      }
     }
   }*/
 

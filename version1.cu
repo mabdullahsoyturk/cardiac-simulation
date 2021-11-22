@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
   // E is the "Excitation" variable, a voltage
   // R is the "Recovery" variable
   // E_prev is the Excitation variable for the previous timestep, and is used in time integration
-  double **E, **R, **E_prev;
+  double *E, *R, *E_prev;
   double *d_E, *d_R, *d_E_prev;
 
   // Various constants - these definitions shouldn't change
@@ -27,12 +27,12 @@ int main(int argc, char** argv) {
   m = n;
   // Allocate contiguous memory for solution arrays. The computational box is defined on [1:m+1,1:n+1]
   // We pad the arrays in order to facilitate differencing on the boundaries of the computation box
-  E = alloc2D(m + 2, n + 2);
-  E_prev = alloc2D(m + 2, n + 2);
-  R = alloc2D(m + 2, n + 2);
-  CUDA_CALL(cudaMallocHost(&d_E, sizeof(double) * (n + 2) * (m + 2)));
-  CUDA_CALL(cudaMallocHost(&d_R, sizeof(double) * (n + 2) * (m + 2)));
-  CUDA_CALL(cudaMallocHost(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n+2) * (m+2)));
+  CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n+2) * (m+2)));
+  CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n+2) * (m+2)));
+  CUDA_CALL(cudaMalloc(&d_E, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMalloc(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
 
   initSolutionArrays(E, R, E_prev, m, n);
 

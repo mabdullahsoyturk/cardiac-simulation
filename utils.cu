@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void initSolutionArrays(double **E, double **R, double **E_prev, int m, int n) {
+void initSolutionArrays2D(double **E, double **R, double **E_prev, int m, int n) {
   int i, j;
   for (j = 1; j <= m; j++)
     for (i = 1; i <= n; i++) E_prev[j][i] = R[j][i] = 0;
@@ -10,6 +10,18 @@ void initSolutionArrays(double **E, double **R, double **E_prev, int m, int n) {
 
   for (j = m / 2 + 1; j <= m; j++)
     for (i = 1; i <= n; i++) R[j][i] = 1.0;
+}
+
+void initSolutionArrays(double *E, double *R, double *E_prev, int m, int n) {
+  int i,j;
+  for (j = 1; j <= m; j++)
+    for (i = 1; i <= n; i++) E_prev[j * (m + 2) + i] = R[j * m + i] = 0;
+
+  for (j = 1; j <= m; j++)
+    for (i = n / 2 + 1; i <= n; i++) E_prev[j * (m + 2) + i] = 1.0;
+
+  for (j = m / 2 + 1; j <= m; j++)
+    for (i = 1; i <= n; i++) R[j * (m + 2) + i] = 1.0;
 }
 
 void dumpPrerunInfo(int n, double T, double dt, int bx, int by, int kernel) {
