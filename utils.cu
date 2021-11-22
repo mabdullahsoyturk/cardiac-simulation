@@ -21,7 +21,21 @@ void dumpPrerunInfo(int n, double T, double dt, int bx, int by, int kernel) {
   cout << endl;
 }
 
-void dumpPostrunInfo(int niter, double time_elapsed, int m, int n, double **E_prev) {
+void dumpPostrunInfo2D(int niter, double time_elapsed, int m, int n, double **E_prev) {
+  double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
+  double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
+
+  cout << "Number of Iterations        : " << niter << endl;
+  cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
+  cout << "Sustained Gflops Rate       : " << Gflops << endl;
+  cout << "Sustained Bandwidth (GB/sec): " << BW << endl << endl;
+
+  double mx;
+  double l2norm = stats2D(E_prev, m, n, &mx);
+  cout << "Max: " << mx << " L2norm: " << l2norm << endl;
+}
+
+void dumpPostrunInfo(int niter, double time_elapsed, int m, int n, double *E_prev) {
   double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
   double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
 
@@ -74,7 +88,7 @@ void cmdLine(int argc, char* argv[], double& T, int& n, int& bx, int& by, int& p
   }
 }
 
-double stats(double** E, int m, int n, double* _mx) {
+double stats2D(double** E, int m, int n, double* _mx) {
   double mx = -1;
   double l2norm = 0;
   int i, j;
@@ -82,6 +96,21 @@ double stats(double** E, int m, int n, double* _mx) {
     for (i = 1; i <= n; i++) {
       l2norm += E[j][i] * E[j][i];
       if (E[j][i] > mx) mx = E[j][i];
+    }
+  *_mx = mx;
+  l2norm /= (double)((m) * (n));
+  l2norm = sqrt(l2norm);
+  return l2norm;
+}
+
+double stats(double* E, int m, int n, double* _mx) {
+  double mx = -1;
+  double l2norm = 0;
+  int i, j;
+  for (j = 1; j <= m; j++)
+    for (i = 1; i <= n; i++) {
+      l2norm += E[j * (m + 2) + i] * E[j * (m + 2) + i];
+      if (E[j * (m + 2) + i] > mx) mx = E[j * (m + 2) + i];
     }
   *_mx = mx;
   l2norm /= (double)((m) * (n));
@@ -112,27 +141,23 @@ double** alloc2D(int m, int n) {
   return (E);
 }
 
-void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double** E, double** R, double** E_prev, int m, int n, cudaStream_t stream[3]) {
-  for(int i = 0; i < m; i++) {
-    CUDA_CALL(cudaMemcpyAsync(d_E + i * n, E[i], sizeof(double) * n, cudaMemcpyHostToDevice, stream[0]));
-    CUDA_CALL(cudaMemcpyAsync(d_R + i * n, R[i], sizeof(double) * n, cudaMemcpyHostToDevice, stream[1]));
-    CUDA_CALL(cudaMemcpyAsync(d_E_prev + i * n, E_prev[i], sizeof(double) * n, cudaMemcpyHostToDevice, stream[2]));
-  }
+void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, int m, int n, cudaStream_t stream[3]) {
+  CUDA_CALL(cudaMemcpyAsync(d_E, E, sizeof(double) * n * m, cudaMemcpyHostToDevice, stream[0]));
+  CUDA_CALL(cudaMemcpyAsync(d_R, R, sizeof(double) * n * m, cudaMemcpyHostToDevice, stream[1]));
+  CUDA_CALL(cudaMemcpyAsync(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice, stream[2]));
   cudaDeviceSynchronize();
 }
 
-void deviceToHostCopy(double** E, double** R, double** E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n, cudaStream_t stream[3]) {
-  for(int i = 0; i < m; i++) {
-    CUDA_CALL(cudaMemcpyAsync(E[i], d_E + i * n, sizeof(double) * n, cudaMemcpyDeviceToHost, stream[0]));
-    CUDA_CALL(cudaMemcpyAsync(R[i], d_R + i * n, sizeof(double) * n, cudaMemcpyDeviceToHost, stream[1]));
-    CUDA_CALL(cudaMemcpyAsync(E_prev[i], d_E_prev + i * n, sizeof(double) * n, cudaMemcpyDeviceToHost, stream[2]));
-  }
+void deviceToHostCopy(double* E, double* R, double* E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n, cudaStream_t stream[3]) {
+  CUDA_CALL(cudaMemcpyAsync(E, d_E, sizeof(double) * n * m, cudaMemcpyDeviceToHost, stream[0]));
+  CUDA_CALL(cudaMemcpyAsync(R, d_R, sizeof(double) * n * m, cudaMemcpyDeviceToHost, stream[1]));
+  CUDA_CALL(cudaMemcpyAsync(E_prev, d_E_prev, sizeof(double) * n * m, cudaMemcpyDeviceToHost, stream[2]));
   cudaDeviceSynchronize();
 }
 
 FILE* gnu = NULL;
 
-void splot(double** U, double T, int niter, int m, int n) {
+void splot2D(double** U, double T, int niter, int m, int n) {
   int i, j;
   if (gnu == NULL) gnu = popen("gnuplot", "w");
 
@@ -165,7 +190,48 @@ void splot(double** U, double T, int niter, int m, int n) {
   return;
 }
 
-void dumpit(double** E, int m) {
+void splot(double* U, double T, int niter, int m, int n) {
+  int i, j;
+  if (gnu == NULL) gnu = popen("gnuplot", "w");
+
+  double mx = -1, mn = 32768;
+  for (j = 0; j < m; j++)
+    for (i = 0; i < n; i++) {
+      if (U[j * (m+2) + i] > mx) mx = U[j * (m+2) + i];
+      if (U[j * (m+2) + i] < mn) mn = U[j * (m+2) + i];
+    }
+
+  fprintf(gnu, "set title \"T = %f [niter = %d]\"\n", T, niter);
+  fprintf(gnu, "set size square\n");
+  fprintf(gnu, "set key off\n");
+  fprintf(gnu, "set pm3d map\n");
+  // Various color schemes
+  fprintf(gnu, "set palette defined (-3 \"blue\", 0 \"white\", 1 \"red\")\n");
+
+  //    fprintf(gnu,"set palette rgbformulae 22, 13, 31\n");
+  //    fprintf(gnu,"set palette rgbformulae 30, 31, 32\n");
+
+  fprintf(gnu, "splot [0:%d] [0:%d][%f:%f] \"-\"\n", m - 1, n - 1, mn, mx);
+  for (j = 0; j < m; j++) {
+    for (i = 0; i < n; i++) {
+      fprintf(gnu, "%d %d %f\n", i, j, U[i * (m + 2) + j]);
+    }
+    fprintf(gnu, "\n");
+  }
+  fprintf(gnu, "e\n");
+  fflush(gnu);
+  return;
+}
+
+void dumpit(double* E, int m) {
+  for(int i = 0; i < m + 2; i++) {
+      for(int j = 0; j < m + 2; j++) {
+        printf("E[%d][%d]:%f\n", i, j, E[i * (m+2) + j]);
+      }
+  }
+}
+
+void dumpit2D(double** E, int m) {
   for(int i = 0; i < m + 2; i++) {
       for(int j = 0; j < m + 2; j++) {
         printf("E[%d][%d]:%f\n", i, j, E[i][j]);
