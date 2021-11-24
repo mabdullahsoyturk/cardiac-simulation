@@ -21,11 +21,12 @@ with open("result_version4.txt") as result_version1:
         if left != "Iteration":
             results2.append((left, right, iter_num))
         else:
-            iter_num = int(right)
+            iter_num = int(right.strip())
 
 for result1, result2 in zip(results1, results2):
     if result1[1] != result2[1]:
         print("Different!!!")
         print(f'Iter num {result1[2]}, Result1 {result1[0]}:{result1[1]}Result2 {result2[0]}:{result2[1]}')
         break
+        
 

@@ -13,23 +13,23 @@ void simulate(double** E, double** E_prev, double** R, const double alpha, const
   // the computational box using mirror boundaries
 
   for (j = 1; j <= m; j++) {
-    E_prev[j][0] = E_prev[j][2];
+    E_prev[j][0] = E_prev[j][2]; // [1..32][0]
     //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", j, 0, j, 2, E_prev[j][2]);
   }
   
   for (j = 1; j <= m; j++) {
-    E_prev[j][n + 1] = E_prev[j][n - 1];
+    E_prev[j][n + 1] = E_prev[j][n - 1]; // [1..32][33]
     //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", j, n+1, j, n-1, E_prev[j][n-1]);
   }
 
   for (i = 1; i <= n; i++) {
-    E_prev[0][i] = E_prev[2][i];
+    E_prev[0][i] = E_prev[2][i]; // [0][1..32]
     //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", 0, i, 2, i, E_prev[2][i]);
   }
   //dumpit(E_prev, m);
   
   for (i = 1; i <= n; i++) {
-    E_prev[m + 1][i] = E_prev[m - 1][i];
+    E_prev[m + 1][i] = E_prev[m - 1][i]; // [33][1..32]
     //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", m+1, i, m-1, i, E_prev[m-1][i]);
   }
 

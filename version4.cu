@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   // Kernel config
   int THREADS = 32;
@@ -52,13 +52,6 @@ int main(int argc, char** argv) {
   dim3 threads(THREADS, THREADS);
   dim3 blocks(BLOCKS, BLOCKS);
 
-  const int nStreams = 3;
-  cudaStream_t stream[nStreams];
-
-  for (int i = 0; i < nStreams; ++i) {
-    CUDA_CALL(cudaStreamCreate(&stream[i]));
-  }
-
   double t0 = getTime(); // Start the timer
 
   // Simulated time is different from the integer timestep number
@@ -68,11 +61,11 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
-    printf("Iteration:%d\n", niter);
+    //printf("Iteration:%d\n", niter);
 
-    hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2, stream);
+    hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
     kernel4<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-    deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2, stream);
+    deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
     //dumpit(E, m);
     //exit(0);
     
@@ -81,7 +74,7 @@ int main(int argc, char** argv) {
     E = E_prev;
     E_prev = tmp;
 
-    dumpit(E, m);
+    //dumpit(E, m);
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
@@ -93,15 +86,11 @@ int main(int argc, char** argv) {
 
   double time_elapsed = getTime() - t0;
 
-  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
     getchar();
-  }
-
-  for (int i = 0; i < nStreams; ++i) {
-    CUDA_CALL(cudaStreamDestroy(stream[i]));
   }
 
   cudaFreeHost(E);

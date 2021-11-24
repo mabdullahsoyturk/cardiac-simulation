@@ -153,18 +153,16 @@ double** alloc2D(int m, int n) {
   return (E);
 }
 
-void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, int m, int n, cudaStream_t stream[3]) {
-  CUDA_CALL(cudaMemcpyAsync(d_E, E, sizeof(double) * n * m, cudaMemcpyHostToDevice, stream[0]));
-  CUDA_CALL(cudaMemcpyAsync(d_R, R, sizeof(double) * n * m, cudaMemcpyHostToDevice, stream[1]));
-  CUDA_CALL(cudaMemcpyAsync(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice, stream[2]));
-  cudaDeviceSynchronize();
+void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, int m, int n) {
+  CUDA_CALL(cudaMemcpy(d_E, E, sizeof(double) * n * m, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_R, R, sizeof(double) * n * m, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice));
 }
 
-void deviceToHostCopy(double* E, double* R, double* E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n, cudaStream_t stream[3]) {
-  CUDA_CALL(cudaMemcpyAsync(E, d_E, sizeof(double) * n * m, cudaMemcpyDeviceToHost, stream[0]));
-  CUDA_CALL(cudaMemcpyAsync(R, d_R, sizeof(double) * n * m, cudaMemcpyDeviceToHost, stream[1]));
-  CUDA_CALL(cudaMemcpyAsync(E_prev, d_E_prev, sizeof(double) * n * m, cudaMemcpyDeviceToHost, stream[2]));
-  cudaDeviceSynchronize();
+void deviceToHostCopy(double* E, double* R, double* E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n) {
+  CUDA_CALL(cudaMemcpy(E, d_E, sizeof(double) * n * m, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(R, d_R, sizeof(double) * n * m, cudaMemcpyDeviceToHost));
+  CUDA_CALL(cudaMemcpy(E_prev, d_E_prev, sizeof(double) * n * m, cudaMemcpyDeviceToHost));
 }
 
 FILE* gnu = NULL;
