@@ -33,6 +33,9 @@ void simulate(double** E, double** E_prev, double** R, const double alpha, const
     //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", m+1, i, m-1, i, E_prev[m-1][i]);
   }
 
+  //dumpit2D(E_prev, m);
+  //exit(0);
+
   // Solve for the excitation, the PDE
   for (j = 1; j <= m; j++) {
     for (i = 1; i <= n; i++) {
@@ -108,6 +111,8 @@ int main(int argc, char** argv) {
     printf("Iteration:%d\n", niter);
 
     simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    //dumpit2D(E, m);
+    //exit(0);
 
     // swap current E with previous E
     double** tmp = E;

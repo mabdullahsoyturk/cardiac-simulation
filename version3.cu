@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
   // Kernel config
   int THREADS = 32;
 
-  int BLOCKS = (n + THREADS - 1) / THREADS;
+  int BLOCKS = (n + 2 + THREADS - 1) / THREADS;
   std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
   std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
 

@@ -13,7 +13,7 @@ with open("result_single.txt") as result_single:
         else:
             iter_num = int(right)
 
-with open("result_version3.txt") as result_version1:
+with open("result_version4.txt") as result_version1:
     lines = result_version1.readlines()
     
     for line in lines:

@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
   // Kernel config
   int THREADS = 32;
 
-  int BLOCKS = (n + THREADS - 1) / THREADS;
+  int BLOCKS = (n + 2 + THREADS - 1) / THREADS;
   std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
   std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
 
@@ -73,13 +73,15 @@ int main(int argc, char** argv) {
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2, stream);
     kernel4<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
     deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2, stream);
+    //dumpit(E, m);
+    //exit(0);
     
     // swap current E with previous E
     double* tmp = E;
     E = E_prev;
     E_prev = tmp;
 
-    //dumpit(E, m);
+    dumpit(E, m);
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
