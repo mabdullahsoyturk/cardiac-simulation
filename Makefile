@@ -252,6 +252,9 @@ version3.o:version3.cu
 version4.o:version4.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
+version5.o:version5.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
 cardiacsim_kernels.o:cardiacsim_kernels.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
@@ -272,9 +275,12 @@ version3: version3.o cardiacsim_kernels.o utils.o
 version4: version4.o cardiacsim_kernels.o utils.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
+version5: version5.o cardiacsim_kernels.o utils.o
+	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+
 run: build
 	$(EXEC) ./cardiacsim
 
 clean:
-	rm -f cardiacsim version1 version2 version3 version4 cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o utils.o
+	rm -f cardiacsim version1 version2 version3 version4 version5 cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o version5.o utils.o
 	rm -rf ./bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/cardiacsim
