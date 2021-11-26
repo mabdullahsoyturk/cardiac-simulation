@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   // Kernel config
   int THREADS = 32;
@@ -84,9 +84,11 @@ int main(int argc, char** argv) {
     }
   }
 
+  dumpit(E, m);
+
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;

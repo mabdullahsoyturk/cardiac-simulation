@@ -33,7 +33,13 @@ void simulate(double** E, double** E_prev, double** R, const double alpha, const
     //printf("E_prev[%d][%d] = E_prev[%d][%d] (%f)\n", m+1, i, m-1, i, E_prev[m-1][i]);
   }
 
-  //dumpit2D(E_prev, m);
+  printf("Before PDE, ODE\n");
+  printf("E: %p, E_prev: %p\n", E, E_prev);
+  printf("\n\nE:\n");
+  dumpit2D(E, m);
+
+  printf("E_prev:\n");
+  dumpit2D(E_prev, m);
   //exit(0);
 
   // Solve for the excitation, the PDE
@@ -108,7 +114,7 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
-    printf("Iteration:%d\n", niter);
+    //printf("Iteration:%d\n", niter);
 
     simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
     //dumpit2D(E, m);
@@ -119,7 +125,17 @@ int main(int argc, char** argv) {
     E = E_prev;
     E_prev = tmp;
 
+    printf("After PDE, ODE\n");
+    printf("\n\nE:\n");
     dumpit2D(E, m);
+    printf("E_prev:\n");
+    dumpit2D(E_prev,m);
+    //printf("E: %p, E_prev: %p\n", E, E_prev);
+
+    /*if(niter == 2) {
+      dumpit2D(E, m);
+      exit(0);
+    }*/
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
@@ -128,6 +144,8 @@ int main(int argc, char** argv) {
       }
     }
   }
+
+  //dumpit2D(E, m);
 
   double time_elapsed = getTime() - t0;
 

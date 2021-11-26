@@ -27,6 +27,7 @@ double stats(double* E, int m, int n, double* _mx);
 double getTime();
 double** alloc2D(int m, int n);
 void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, int m, int n);
+void hostToDeviceCopyV5(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, double* temp, int m, int n);
 void deviceToHostCopy(double* E, double* R, double* E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n);
 void initSolutionArrays2D(double **E, double **R, double **E_prev, int m, int n);
 void initSolutionArrays(double *E, double *R, double *E_prev, int m, int n);

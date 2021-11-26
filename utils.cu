@@ -157,14 +157,19 @@ void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double* E, dou
   CUDA_CALL(cudaMemcpy(d_E, E, sizeof(double) * n * m, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_R, R, sizeof(double) * n * m, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice));
-  cudaDeviceSynchronize();
+}
+
+void hostToDeviceCopyV5(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, double* temp, int m, int n) {
+  CUDA_CALL(cudaMemcpy(d_E, E, sizeof(double) * n * m, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_R, R, sizeof(double) * n * m, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice));
+  CUDA_CALL(cudaMemcpy(temp, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice));
 }
 
 void deviceToHostCopy(double* E, double* R, double* E_prev, double* d_E, double* d_R, double* d_E_prev, int m, int n) {
   CUDA_CALL(cudaMemcpy(E, d_E, sizeof(double) * n * m, cudaMemcpyDeviceToHost));
   CUDA_CALL(cudaMemcpy(R, d_R, sizeof(double) * n * m, cudaMemcpyDeviceToHost));
   CUDA_CALL(cudaMemcpy(E_prev, d_E_prev, sizeof(double) * n * m, cudaMemcpyDeviceToHost));
-  cudaDeviceSynchronize();
 }
 
 FILE* gnu = NULL;
