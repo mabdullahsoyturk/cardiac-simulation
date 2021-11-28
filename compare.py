@@ -13,7 +13,7 @@ with open("result_single.txt") as result_single:
         else:
             iter_num = int(right)
 
-with open("result_version4.txt") as result_version1:
+with open("test_version5.txt") as result_version1:
     lines = result_version1.readlines()
     
     for line in lines:
@@ -26,7 +26,7 @@ with open("result_version4.txt") as result_version1:
 for result1, result2 in zip(results1, results2):
     if result1[1] != result2[1]:
         print("Different!!!")
-        print(f'Iter num {result1[2]}, Result1 {result1[0]}:{result1[1]}Result2 {result2[0]}:{result2[1]}')
+        print(f'Result1 {result1[0]}:{result1[1]}Result2 {result2[0]}:{result2[1]}')
         break
         
 

@@ -251,7 +251,7 @@ void dumpit(double* E, int m) {
 void dumpit2D(double** E, int m) {
   for(int i = 0; i < m + 2; i++) {
       for(int j = 0; j < m + 2; j++) {
-        printf("E[%d][%d]:%f\n", i, j, E[i][j]);
+        printf("E[%d][%d]:%lf\n", i, j, E[i][j]);
       }
   }
 }

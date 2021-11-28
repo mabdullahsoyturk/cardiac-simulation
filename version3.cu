@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
-    printf("Iteration:%d\n", niter);
+    //printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
     kernel3<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
