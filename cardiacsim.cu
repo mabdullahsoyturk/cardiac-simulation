@@ -135,11 +135,11 @@ int main(int argc, char** argv) {
     }
   }
 
-  dumpit2D(E, m);
+  //dumpit2D(E, m);
 
   double time_elapsed = getTime() - t0;
 
-  //dumpPostrunInfo2D(niter, time_elapsed, m, n, E_prev);
+  dumpPostrunInfo2D(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;

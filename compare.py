@@ -3,7 +3,7 @@ results2 = []
 
 iter_num = 0
 
-with open("result_single.txt") as result_single:
+with open("test_single.txt") as result_single:
     lines = result_single.readlines()
 
     for line in lines:

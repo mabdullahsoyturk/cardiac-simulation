@@ -232,12 +232,12 @@ __global__ void kernel5(double* E, double* E_prev, double* R, const double alpha
     }*/
   }
 
-  if(blockIdx.x == 0 && blockIdx.y == 0 && threadIdx.x == 0 && threadIdx.y == 0) {
+  /*if(blockIdx.x == 0 && blockIdx.y == 0 && threadIdx.x == 0 && threadIdx.y == 0) {
     for(int i = 0; i < m+2; i++) {
       for(int j = 0; j < n+2; j++) {
         //printf("Iteration: %d, E[%d][%d]=%f, E_prev[%d][%d]=%f\n", iteration, i, j, E[i * (n+2) + j], i, j, E_prev[i * (n+2) + j]);
         printf("E[%d][%d]:%f\n", i, j, E[i * (n+2) + j]);
       }
     }
-  }
+  }*/
 }

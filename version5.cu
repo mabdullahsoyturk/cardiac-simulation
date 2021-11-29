@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
   CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n+2) * (m+2)));
   CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n+2) * (m+2)));
   CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n+2) * (m+2)));
+
   CUDA_CALL(cudaMalloc(&d_E, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
@@ -54,38 +55,29 @@ int main(int argc, char** argv) {
 
   double t0 = getTime(); // Start the timer
 
-  // Simulated time is different from the integer timestep number
-  double t = 0.0; // Simulated time
-  int niter = 0;  // Integer timestep number
+  int num_iterations = (int)(T / dt) + 1;
+  //int num_iterations = 2;
+  std::cerr << "T: " << T << ", dt: " << dt << ", x: " << ((int)(T / dt) + 1) << std::endl;
 
-  while (t < T) {
-    t += dt;
-    niter++;
-    //printf("Iteration:%d\n", niter);
+  hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
 
-    hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
-    kernel2<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-    deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
-    
-    // swap current E with previous E
-    double* tmp = E;
-    E = E_prev;
-    E_prev = tmp;
+  void *kernelArgs[] = {
+      (void *)&d_E,  (void *)&d_E_prev, (void *)&d_R,
+      (void *)&alpha, (void *)&n, (void *)&m,   (void *)&kk,
+      (void *)&dt, (void *)&a, (void *)&epsilon, (void *)&M1, (void *)&M2, (void *)&b, (void *)&num_iterations
+  };
 
-    //dumpit(E, m);
-
-    if (plot_freq) {
-      int k = (int)(t / plot_freq);
-      if ((t - k * plot_freq) < dt) {
-        splot(E, t, niter, m + 2, n + 2);
-      }
-    }
-  }
-  
+  CUDA_CALL(cudaLaunchCooperativeKernel((void *)kernel5, blocks, threads, kernelArgs, 0, 0));
+  //kernel5<<<blocks, threads>>>(d_E, d_E_prev, d_R, temp, alpha, n, m, kk, dt, a, epsilon, M1, M2, b, num_iterations);
+  deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
   //dumpit(E, m);
+  //exit(0);
+  
+  //dumpit(E_prev, m);
+
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  dumpPostrunInfo(num_iterations, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
