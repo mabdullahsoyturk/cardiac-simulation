@@ -45,7 +45,8 @@ int main(int argc, char** argv) {
   // Kernel config
   int THREADS = 32;
 
-  int BLOCKS = (n + 2 + THREADS - 1) / THREADS;
+  //int BLOCKS = (n + 2 + THREADS - 1) / THREADS;
+  int BLOCKS = n / THREADS;
   std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
   std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
 
@@ -84,11 +85,11 @@ int main(int argc, char** argv) {
     }
   }
 
-  //dumpit(E, m);
+  dumpit(E, m);
 
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  //dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;

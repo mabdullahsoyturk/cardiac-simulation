@@ -22,6 +22,9 @@ int main(int argc, char** argv) {
   cmdLine(argc, argv, T, n, bx, by, plot_freq, kernel);
   m = n;
 
+  size_t size = sizeof(double) * (n+2) * (m+2);
+  printf("Size: %ld\n", size);
+
   CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n+2) * (m+2)));
   CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n+2) * (m+2)));
   CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n+2) * (m+2)));

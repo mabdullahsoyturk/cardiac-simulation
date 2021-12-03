@@ -225,7 +225,7 @@ endif
 # Target rules
 all: build
 
-build: cardiacsim version1 version2 version3 version4
+build: cardiacsim version1 version2 version3 version4 version5
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)

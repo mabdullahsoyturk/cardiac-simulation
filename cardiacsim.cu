@@ -107,25 +107,13 @@ int main(int argc, char** argv) {
   while (t < T) {
     t += dt;
     niter++;
-    //printf("Iteration:%d\n", niter);
 
     simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
-    //dumpit2D(E, m);
-    //exit(0);
 
     // swap current E with previous E
     double** tmp = E;
     E = E_prev;
     E_prev = tmp;
-
-    //printf("E[0][44]=%f\n", E[0][44]);
-    //dumpit2D(E, m);
-    //printf("E: %p, E_prev: %p\n", E, E_prev);
-
-    /*if(niter == 2) {
-      dumpit2D(E, m);
-      exit(0);
-    }*/
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
@@ -135,11 +123,11 @@ int main(int argc, char** argv) {
     }
   }
 
-  //dumpit2D(E, m);
+  dumpit2D(E, m);
 
   double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo2D(niter, time_elapsed, m, n, E_prev);
+  //dumpPostrunInfo2D(niter, time_elapsed, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
