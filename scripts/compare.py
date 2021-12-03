@@ -3,7 +3,7 @@ results2 = []
 
 iter_num = 0
 
-with open("test_single.txt") as result_single:
+with open("../results/test_single.txt") as result_single:
     lines = result_single.readlines()
 
     for line in lines:
@@ -13,7 +13,7 @@ with open("test_single.txt") as result_single:
         else:
             iter_num = int(right)
 
-with open("test_version5.txt") as result_version1:
+with open("../results/test_version5.txt") as result_version1:
     lines = result_version1.readlines()
     
     for line in lines:

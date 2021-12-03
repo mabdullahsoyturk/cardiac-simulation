@@ -179,7 +179,7 @@ else
 endif
 
 ALL_CCFLAGS :=
-ALL_CCFLAGS += $(NVCCFLAGS)
+ALL_CCFLAGS += $(NVCCFLAGS) -std=c++11
 ALL_CCFLAGS += $(EXTRA_NVCCFLAGS)
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(CCFLAGS))
 ALL_CCFLAGS += $(addprefix -Xcompiler ,$(EXTRA_CCFLAGS))
@@ -192,7 +192,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I../../common/inc -I./
+INCLUDES  := -I../../common/inc -I./ -I./include
 LIBRARIES :=
 
 ################################################################################
@@ -221,11 +221,14 @@ EXEC ?= @echo "[@]"
 endif
 
 ################################################################################
+TARGETS := cardiacsim version1 version2 version3 version4 version5
+OBJS := cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o version5.o utils.o
+DEPS := cardiacsim_kernels.o utils.o
 
 # Target rules
 all: build
 
-build: cardiacsim version1 version2 version3 version4 version5
+build: $(TARGETS)
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -234,51 +237,50 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-utils.o:utils.cu
+utils.o:src/utils.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-cardiacsim.o:cardiacsim.cu
+cardiacsim.o:src/cardiacsim.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-version1.o:version1.cu
+version1.o:src/version1.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-version2.o:version2.cu
+version2.o:src/version2.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-version3.o:version3.cu
+version3.o:src/version3.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-version4.o:version4.cu
+version4.o:src/version4.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-version5.o:version5.cu
+version5.o:src/version5.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-cardiacsim_kernels.o:cardiacsim_kernels.cu
+cardiacsim_kernels.o:src/cardiacsim_kernels.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-cardiacsim: cardiacsim.o cardiacsim_kernels.o utils.o
+cardiacsim: cardiacsim.o $(DEPS)
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
-version1: version1.o cardiacsim_kernels.o utils.o
+version1: version1.o $(DEPS)
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
-version2: version2.o cardiacsim_kernels.o utils.o
+version2: version2.o $(DEPS)
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
-version3: version3.o cardiacsim_kernels.o utils.o
+version3: version3.o $(DEPS)
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
-version4: version4.o cardiacsim_kernels.o utils.o
+version4: version4.o $(DEPS)
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
-version5: version5.o cardiacsim_kernels.o utils.o
+version5: version5.o $(DEPS)
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run: build
 	$(EXEC) ./cardiacsim
 
 clean:
-	rm -f cardiacsim version1 version2 version3 version4 version5 cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o version5.o utils.o
-	rm -rf ./bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/cardiacsim
+	rm -f $(TARGETS) $(OBJS)
