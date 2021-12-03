@@ -1,5 +1,4 @@
 *.o
 cardiacsim
 bin/
-result_*
 test_*
