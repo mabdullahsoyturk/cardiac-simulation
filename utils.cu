@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void initSolutionArrays2D(double **E, double **R, double **E_prev, int m, int n) {
+void initSolutionArrays2D(double** E, double** R, double** E_prev, int m, int n) {
   int i, j;
   for (j = 1; j <= m; j++)
     for (i = 1; i <= n; i++) E_prev[j][i] = R[j][i] = 0;
@@ -12,8 +12,8 @@ void initSolutionArrays2D(double **E, double **R, double **E_prev, int m, int n)
     for (i = 1; i <= n; i++) R[j][i] = 1.0;
 }
 
-void initSolutionArrays(double *E, double *R, double *E_prev, int m, int n) {
-  int i,j;
+void initSolutionArrays(double* E, double* R, double* E_prev, int m, int n) {
+  int i, j;
   for (j = 1; j <= m; j++)
     for (i = 1; i <= n; i++) E_prev[j * (m + 2) + i] = R[j * m + i] = 0;
 
@@ -33,7 +33,7 @@ void dumpPrerunInfo(int n, double T, double dt, int bx, int by, int kernel) {
   cout << endl;
 }
 
-void dumpPostrunInfo2D(int niter, double time_elapsed, int m, int n, double **E_prev) {
+void dumpPostrunInfo2D(int niter, double time_elapsed, int m, int n, double** E_prev) {
   double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
   double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
 
@@ -47,7 +47,7 @@ void dumpPostrunInfo2D(int niter, double time_elapsed, int m, int n, double **E_
   cout << "Max: " << mx << " L2norm: " << l2norm << endl;
 }
 
-void dumpPostrunInfo(int niter, double time_elapsed, int m, int n, double *E_prev) {
+void dumpPostrunInfo(int niter, double time_elapsed, int m, int n, double* E_prev) {
   double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
   double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
 
@@ -74,23 +74,23 @@ void cmdLine(int argc, char* argv[], double& T, int& n, int& bx, int& by, int& p
     int c;
     while ((c = getopt_long(argc, argv, "n:x:y:t:p:v:", long_options, NULL)) != -1) {
       switch (c) {
-        case 'n': // Size of the computational box
+        case 'n':  // Size of the computational box
           n = atoi(optarg);
           break;
-        case 'x': // X block geometry
+        case 'x':  // X block geometry
           bx = atoi(optarg);
-        case 'y': // Y block geometry
+        case 'y':  // Y block geometry
           by = atoi(optarg);
-        case 't': // Length of simulation, in simulated time units
+        case 't':  // Length of simulation, in simulated time units
           T = atof(optarg);
           break;
-        case 'p': // Plot the excitation variable
+        case 'p':  // Plot the excitation variable
           plot_freq = atoi(optarg);
-          break; // Kernel version
+          break;  // Kernel version
         case 'v':
           kernel = atoi(optarg);
           break;
-        default: // Error
+        default:  // Error
           printf(
               "Usage:  [-n <domain size>] [-t <final time >]\n\t [-p <plot frequency>]\n\t[-x <x block geometry> [-y "
               "<y block geometry][-v <Kernel Version>]\n");
@@ -159,7 +159,8 @@ void hostToDeviceCopy(double* d_E, double* d_R, double* d_E_prev, double* E, dou
   CUDA_CALL(cudaMemcpy(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice));
 }
 
-void hostToDeviceCopyV5(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, double* temp, int m, int n) {
+void hostToDeviceCopyV5(double* d_E, double* d_R, double* d_E_prev, double* E, double* R, double* E_prev, double* temp,
+                        int m, int n) {
   CUDA_CALL(cudaMemcpy(d_E, E, sizeof(double) * n * m, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_R, R, sizeof(double) * n * m, cudaMemcpyHostToDevice));
   CUDA_CALL(cudaMemcpy(d_E_prev, E_prev, sizeof(double) * n * m, cudaMemcpyHostToDevice));
@@ -214,8 +215,8 @@ void splot(double* U, double T, int niter, int m, int n) {
   double mx = -1, mn = 32768;
   for (j = 0; j < m; j++)
     for (i = 0; i < n; i++) {
-      if (U[j * (m+2) + i] > mx) mx = U[j * (m+2) + i];
-      if (U[j * (m+2) + i] < mn) mn = U[j * (m+2) + i];
+      if (U[j * (m + 2) + i] > mx) mx = U[j * (m + 2) + i];
+      if (U[j * (m + 2) + i] < mn) mn = U[j * (m + 2) + i];
     }
 
   fprintf(gnu, "set title \"T = %f [niter = %d]\"\n", T, niter);
@@ -241,17 +242,17 @@ void splot(double* U, double T, int niter, int m, int n) {
 }
 
 void dumpit(double* E, int m) {
-  for(int i = 0; i < m + 2; i++) {
-      for(int j = 0; j < m + 2; j++) {
-        printf("E[%d][%d]:%f\n", i, j, E[i * (m+2) + j]);
-      }
+  for (int i = 0; i < m + 2; i++) {
+    for (int j = 0; j < m + 2; j++) {
+      printf("E[%d][%d]:%f\n", i, j, E[i * (m + 2) + j]);
+    }
   }
 }
 
 void dumpit2D(double** E, int m) {
-  for(int i = 0; i < m + 2; i++) {
-      for(int j = 0; j < m + 2; j++) {
-        printf("E[%d][%d]:%lf\n", i, j, E[i][j]);
-      }
+  for (int i = 0; i < m + 2; i++) {
+    for (int j = 0; j < m + 2; j++) {
+      printf("E[%d][%d]:%lf\n", i, j, E[i][j]);
+    }
   }
 }

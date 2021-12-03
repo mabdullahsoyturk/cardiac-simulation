@@ -4,8 +4,8 @@
 
 #include <iomanip>
 
-#include "utils.h"
 #include "cardiacsim_kernels.h"
+#include "utils.h"
 
 int main(int argc, char** argv) {
   // E is the "Excitation" variable, R is the "Recovery" variable
@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
   cmdLine(argc, argv, T, n, bx, by, plot_freq, kernel);
   m = n;
 
-  CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n+2) * (m+2)));
-  CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n+2) * (m+2)));
-  CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n+2) * (m+2)));
+  CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_E, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_E_prev, sizeof(double) * (n + 2) * (m + 2)));
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  // dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   // Kernel config
   int THREADS = 32;
@@ -52,27 +52,27 @@ int main(int argc, char** argv) {
   dim3 threads(THREADS, THREADS);
   dim3 blocks(BLOCKS, BLOCKS);
 
-  double t0 = getTime(); // Start the timer
+  double t0 = getTime();  // Start the timer
 
   // Simulated time is different from the integer timestep number
-  double t = 0.0; // Simulated time
-  int niter = 0;  // Integer timestep number
+  double t = 0.0;  // Simulated time
+  int niter = 0;   // Integer timestep number
 
   while (t < T) {
     t += dt;
     niter++;
-    //printf("Iteration:%d\n", niter);
+    // printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
     kernel2<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
     deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
-    
+
     // swap current E with previous E
     double* tmp = E;
     E = E_prev;
     E_prev = tmp;
 
-    //dumpit(E, m);
+    // dumpit(E, m);
 
     if (plot_freq) {
       int k = (int)(t / plot_freq);
@@ -81,8 +81,8 @@ int main(int argc, char** argv) {
       }
     }
   }
-  
-  //dumpit(E, m);
+
+  // dumpit(E, m);
   double time_elapsed = getTime() - t0;
 
   dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);

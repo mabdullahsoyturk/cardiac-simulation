@@ -4,10 +4,10 @@
 
 #include <iomanip>
 
-#include "utils.h"
 #include "cardiacsim_kernels.h"
+#include "utils.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   // E is the "Excitation" variable, R is the "Recovery" variable
   // E_prev is the Excitation variable for the previous timestep, and is used in time integration
   double *E, *R, *E_prev;
@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
   cmdLine(argc, argv, T, n, bx, by, plot_freq, kernel);
   m = n;
 
-  CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n+2) * (m+2)));
-  CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n+2) * (m+2)));
-  CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n+2) * (m+2)));
+  CUDA_CALL(cudaMallocHost(&E, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&E_prev, sizeof(double) * (n + 2) * (m + 2)));
+  CUDA_CALL(cudaMallocHost(&R, sizeof(double) * (n + 2) * (m + 2)));
 
   CUDA_CALL(cudaMalloc(&d_E, sizeof(double) * (n + 2) * (m + 2)));
   CUDA_CALL(cudaMalloc(&d_R, sizeof(double) * (n + 2) * (m + 2)));
@@ -41,12 +41,11 @@ int main(int argc, char** argv) {
   double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
   double alpha = d * dt / (dx * dx);
 
-  //dumpPrerunInfo(n, T, dt, bx, by, kernel);
+  // dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   // Kernel config
   int THREADS = 32;
 
-  //int BLOCKS = (n + 2 + THREADS - 1) / THREADS;
   int BLOCKS = n / THREADS;
   std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
   std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
@@ -54,27 +53,25 @@ int main(int argc, char** argv) {
   dim3 threads(THREADS, THREADS);
   dim3 blocks(BLOCKS, BLOCKS);
 
-  double t0 = getTime(); // Start the timer
+  double t0 = getTime();  // Start the timer
 
   int num_iterations = (int)(T / dt) + 1;
-  //int num_iterations = 2;
   std::cerr << "T: " << T << ", dt: " << dt << ", x: " << ((int)(T / dt) + 1) << std::endl;
 
   hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
 
-  void *kernelArgs[] = {
-      (void *)&d_E,  (void *)&d_E_prev, (void *)&d_R,
-      (void *)&alpha, (void *)&n, (void *)&m,   (void *)&kk,
-      (void *)&dt, (void *)&a, (void *)&epsilon, (void *)&M1, (void *)&M2, (void *)&b, (void *)&num_iterations
-  };
+  void *kernelArgs[] = {(void *)&d_E, (void *)&d_E_prev,
+                        (void *)&d_R, (void *)&alpha,
+                        (void *)&n,   (void *)&m,
+                        (void *)&kk,  (void *)&dt,
+                        (void *)&a,   (void *)&epsilon,
+                        (void *)&M1,  (void *)&M2,
+                        (void *)&b,   (void *)&num_iterations};
 
   CUDA_CALL(cudaLaunchCooperativeKernel((void *)kernel5, blocks, threads, kernelArgs, 0, 0));
-  //kernel5<<<blocks, threads>>>(d_E, d_E_prev, d_R, temp, alpha, n, m, kk, dt, a, epsilon, M1, M2, b, num_iterations);
   deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
-  //dumpit(E, m);
-  //exit(0);
-  
-  //dumpit(E_prev, m);
+
+  // dumpit(E_prev, m);
 
   double time_elapsed = getTime() - t0;
 
