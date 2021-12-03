@@ -1,16 +1,10 @@
 CUDA_PATH ?= /usr/local/cuda-11.0
 HOST_COMPILER ?= g++
 NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
-
 NVCCFLAGS   :=
 
-# Debug build flags
 ifeq ($(dbg),1)
       NVCCFLAGS += -g -G
-      BUILD_TYPE := debug
-else
-      BUILD_TYPE := release
-endif
 
 ALL_CCFLAGS := $(NVCCFLAGS) -std=c++11
 ALL_LDFLAGS := $(ALL_CCFLAGS)
