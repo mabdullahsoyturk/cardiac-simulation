@@ -7,9 +7,9 @@ with open("../results/test_single.txt") as result_single:
         left, right = line.split(":")
         results1.append((left, right))
 
-with open("../results/test_version5.txt") as result_version1:
+with open("../results/test_version3.txt") as result_version1:
     lines = result_version1.readlines()
-    
+
     for line in lines:
         left, right = line.split(":")
         results2.append((left, right))

@@ -79,8 +79,10 @@ void cmdLine(int argc, char* argv[], double& T, int& n, int& bx, int& by, int& p
           break;
         case 'x':  // X block geometry
           bx = atoi(optarg);
+          break;
         case 'y':  // Y block geometry
           by = atoi(optarg);
+          break;
         case 't':  // Length of simulation, in simulated time units
           T = atof(optarg);
           break;

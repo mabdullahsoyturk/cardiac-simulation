@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
   double T = 1000.0;
   int m = 200, n = 200;
   int plot_freq = 0;
-  int bx = 1, by = 1;
+  int bx = 32, by = 32;
   int kernel = 1;
 
   cmdLine(argc, argv, T, n, bx, by, plot_freq, kernel);
@@ -43,16 +43,17 @@ int main(int argc, char** argv) {
   // dumpPrerunInfo(n, T, dt, bx, by, kernel);
 
   // Kernel config
-  int THREADS = 32;
+  //int THREADS = 32;
 
-  int BLOCKS = n / THREADS;
-  std::cerr << "threads(" << THREADS << "," << THREADS << ")" << std::endl;
-  std::cerr << "blocks(" << BLOCKS << "," << BLOCKS << ")" << std::endl;
+  int BLOCKSx = n / bx;
+  int BLOCKSy = n / by;
+  std::cerr << "threads(" << bx << "," << by << ")" << std::endl;
+  std::cerr << "blocks(" << BLOCKSx << "," << BLOCKSy << ")" << std::endl;
 
-  dim3 threads(THREADS, THREADS);
-  dim3 blocks(BLOCKS, BLOCKS);
+  dim3 threads(bx, by);
+  dim3 blocks(BLOCKSx, BLOCKSy);
 
-  double t0 = getTime();  // Start the timer
+  double total_time = 0;
 
   // Simulated time is different from the integer timestep number
   double t = 0.0;  // Simulated time
@@ -64,7 +65,11 @@ int main(int argc, char** argv) {
     // printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
+    double t0 = getTime();  // Start the timer
     kernel3<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    cudaDeviceSynchronize();
+    double time_elapsed = getTime() - t0;
+    total_time += time_elapsed;
     deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
 
     // swap current E with previous E
@@ -82,10 +87,9 @@ int main(int argc, char** argv) {
     }
   }
 
-  // dumpit(E, m);
-  double time_elapsed = getTime() - t0;
+  //dumpit(E, m);
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  dumpPostrunInfo(niter, total_time, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;

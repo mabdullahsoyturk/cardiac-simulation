@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
   dim3 threads(THREADS, THREADS);
   dim3 blocks(BLOCKS, BLOCKS);
 
-  double t0 = getTime();  // Start the timer
+  double total_time = 0;
 
   // Simulated time is different from the integer timestep number
   double t = 0.0;  // Simulated time
@@ -65,7 +65,11 @@ int main(int argc, char** argv) {
     // printf("Iteration:%d\n", niter);
 
     hostToDeviceCopy(d_E, d_R, d_E_prev, E, R, E_prev, m + 2, n + 2);
+    double t0 = getTime();  // Start the timer
     kernel4<<<blocks, threads>>>(d_E, d_E_prev, d_R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b);
+    cudaDeviceSynchronize();
+    double time_elapsed = getTime() - t0;
+    total_time += time_elapsed;
     deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
     // dumpit(E, m);
     // exit(0);
@@ -87,9 +91,8 @@ int main(int argc, char** argv) {
 
   // dumpit(E, m);
 
-  double time_elapsed = getTime() - t0;
 
-  dumpPostrunInfo(niter, time_elapsed, m, n, E_prev);
+  dumpPostrunInfo(niter, total_time, m, n, E_prev);
 
   if (plot_freq) {
     cout << "\n\nEnter any input to close the program and the plot..." << endl;
