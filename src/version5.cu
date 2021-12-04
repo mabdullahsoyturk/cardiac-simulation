@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
   dim3 threads(THREADS, THREADS);
   dim3 blocks(BLOCKS, BLOCKS);
 
-  double t0 = getTime();  // Start the timer
 
   int num_iterations = (int)(T / dt) + 1;
   std::cerr << "T: " << T << ", dt: " << dt << ", x: " << ((int)(T / dt) + 1) << std::endl;
@@ -68,12 +67,14 @@ int main(int argc, char **argv) {
                         (void *)&M1,  (void *)&M2,
                         (void *)&b,   (void *)&num_iterations};
 
+  double t0 = getTime();  // Start the timer
   CUDA_CALL(cudaLaunchCooperativeKernel((void *)kernel5, blocks, threads, kernelArgs, 0, 0));
+  cudaDeviceSynchronize();
+  double time_elapsed = getTime() - t0;
   deviceToHostCopy(E, R, E_prev, d_E, d_R, d_E_prev, m + 2, n + 2);
 
   // dumpit(E_prev, m);
 
-  double time_elapsed = getTime() - t0;
 
   dumpPostrunInfo(num_iterations, time_elapsed, m, n, E_prev);
 

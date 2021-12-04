@@ -5,6 +5,7 @@ NVCCFLAGS   :=
 
 ifeq ($(dbg),1)
       NVCCFLAGS += -g -G
+endif
 
 ALL_CCFLAGS := $(NVCCFLAGS) -std=c++11
 ALL_LDFLAGS := $(ALL_CCFLAGS)
