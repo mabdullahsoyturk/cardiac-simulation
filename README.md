@@ -6,6 +6,8 @@ This repository contains 6 different implementations of Aliev-Panfilov heart ele
 
 Cardiac electrophysiology simulators can be used for clinical diagnostic and therapeutic purposes. They solve two equations repetitively: a system of Ordinary Differential Equations (ODEs) together with Partial Differential Equations (PDEs). This simulator models the propagation of electrical signals in the heart, and it incorporates a cell model describing the kinetics of a the membrane of a single cell. The PDE couples multiple cells into a system. This simulator uses a model known as the Aliev-Panfilov model, that maintains 2 state variables, and solves one PDE. This simple model can account for complex behavior such as how spiral waves break up and form elaborate patterns. Spiral waves can lead to life threatening situations such as ventricular fibrillation (a medical condition when the heart.muscle twitches randomly rather than contracting in a coordinated fashion).
 
+![Spiral Wave](figures/spiral_wave.png)
+
 This simulator models electrical signals in an idealized system in which voltages vary at discrete points in time, called timesteps on discrete positions of a mesh of points. At each time step, the simulator updates the voltage according to nearest neighboring positions in space and time. This is done first in space, and next in time. Nearest neighbors in space are defined on the north, south, east and west.
 
 ## Project Structure
