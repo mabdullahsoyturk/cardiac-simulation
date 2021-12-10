@@ -1,3 +1,3 @@
 *.o
-cardiacsim
-version*
+cpu_implementation
+gpu_implementation*

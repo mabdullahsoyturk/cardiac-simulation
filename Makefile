@@ -23,9 +23,9 @@ GENCODE_FLAGS += -gencode arch=compute_$(HIGHEST_SM),code=compute_$(HIGHEST_SM)
 endif
 endif
 
-TARGETS := cardiacsim version1 version2 version3 version4 version5
-OBJS := cardiacsim.o cardiacsim_kernels.o version1.o version2.o version3.o version4.o version5.o utils.o
-DEPS := cardiacsim_kernels.o utils.o
+TARGETS := cpu_implementation gpu_implementation1 gpu_implementation2 gpu_implementation3 gpu_implementation4 gpu_implementation5
+OBJS := cpu_implementation.o kernels.o gpu_implementation1.o gpu_implementation2.o gpu_implementation3.o gpu_implementation4.o gpu_implementation5.o utils.o
+DEPS := kernels.o utils.o
 
 all: build
 

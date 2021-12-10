@@ -1,4 +1,4 @@
-#include "cardiacsim_kernels.h"
+#include "kernels.h"
 
 __global__ void kernel1_pde(double* E, double* E_prev, double* R, const double alpha, const int n, const int m,
                             const double kk, const double dt, const double a, const double epsilon, const double M1,
