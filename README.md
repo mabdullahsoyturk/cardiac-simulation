@@ -88,3 +88,9 @@ Bandwidth of each version for n = 1024, t = 500:
 | GPU Implementation2 | 8.18945 GB/s |
 | GPU Implementation3 | 8.19028 GB/s |
 | GPU Implementation4 | 8.19527 GB/s |
+
+## Reference
+
+CPU implementation is based on the code orginally provided by Xing Cai from Simula Research Laboratory and reimplementation by Scott B. Baden, UCSD and modification by Didem Unat, Koc University.
+
+Refer to [Detailed Numerical Analyses of the Aliev-Panfilov Model on GPGPU](https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu) by Xing Cai, Didem Unat and Scott Baden
