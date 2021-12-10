@@ -95,4 +95,6 @@ Bandwidth of each version for n = 1024, t = 500:
 
 CPU implementation is based on the code orginally provided by Xing Cai from Simula Research Laboratory and reimplementation by Scott B. Baden, UCSD and modification by Didem Unat, Koc University.
 
-Refer to [Detailed Numerical Analyses of the Aliev-Panfilov Model on GPGPU](https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu) by Xing Cai, Didem Unat and Scott Baden
+Refer to [Detailed Numerical Analyses of the Aliev-Panfilov Model on GPGPU](https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu) by Xing Cai, Didem Unat and Scott Baden.
+
+First spiral wave figure is from [Atrial and ventricular fibrillation: Computational simulation of spiral waves in cardiac tissue](https://www.researchgate.net/publication/225550049_Atrial_and_ventricular_fibrillation_Computational_simulation_of_spiral_waves_in_cardiac_tissue) by Serdar Goktepe, Jonathan Wong and Ellen Kuhl.
