@@ -65,7 +65,7 @@ The experiments are done on a V100 GPU and a Intel(R) Xeon(R) Gold 6148 CPU @ 2.
 | 512x512, t=500 |   207.396s |     39.6157s |  39.1749s |   39.2181s |  39.2334s |  0 |
 | 1024x1024, t=500 | 2955.68s |     527.377s |  524.705s |   524.582s |  524.065s |  0 |
 
-Persistent kernel implementation does not scale more than 256x256 because cooperative groups require at most 1 block per SM.
+Persistent kernel implementation does not scale more than 256x256 because cooperative groups allows us to launch at most 1 block per SM (Assuming each thread block contains max number of threads, in my experiments 1024).
 
 | Implementation | GFlop/s |
 | ------ | ------ |
