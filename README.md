@@ -76,7 +76,7 @@ Persistent kernel implementation does not scale more than 256x256 because cooper
 
 ## Bandwidth Analysis
 
-Maximum achievable bandwidth on the system (based on bandwidthTest of [CUDA Samples](https://github.com/NVIDIA/cuda-samples/tree/master/Samples/bandwidthTest)): 
+Maximum achievable bandwidth on the system (based on bandwidthTest of [CUDA Samples](https://github.com/NVIDIA/cuda-samples/tree/master/Samples/1_Utilities/bandwidthTest)): 
 
 | Host-to-Device | Device-to-Host | Device-to-Device |
 | ------ | ------ | ------ |
