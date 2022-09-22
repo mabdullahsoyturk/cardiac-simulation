@@ -67,12 +67,12 @@ The experiments are done on a V100 GPU and a Intel(R) Xeon(R) Gold 6148 CPU @ 2.
 
 Persistent kernel implementation does not scale more than 256x256 because cooperative groups allows us to launch at most 1 block per SM (Assuming each thread block contains max number of threads, in my experiments 1024).
 
-| Implementation | GFlop/s |
-| ------ | ------ |
-| GPU Implementation1 | 290.917 |
-| GPU Implementation2 | 406.88 |
-| GPU Implementation3 | 407.567 |
-| GPU Implementation4 | 436.825 |
+| Implementation | GFlop/s (V100) | GFlop/s (A100) |
+| ------ | ------ | ------ |
+| GPU Implementation1 | 290.917 | 398.067 |
+| GPU Implementation2 | 406.88 | 469.252 |
+| GPU Implementation3 | 407.567 | 472.202 |
+| GPU Implementation4 | 436.825 | 596.678 |
 
 ## Bandwidth Analysis
 
